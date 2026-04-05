@@ -338,7 +338,7 @@ export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
           value={searchType}
           onChange={(event) => setSearchType(event.target.value as 'project' | 'profile')}
         >
-          <option value='project'>Project names</option>
+          <option value='project'>Projects</option>
           <option value='profile'>Profiles</option>
         </select>
         <input

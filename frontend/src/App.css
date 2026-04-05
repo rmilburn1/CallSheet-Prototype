@@ -130,7 +130,8 @@ p {
   z-index: 1000;
   padding: 1rem 0;
   background-color: var(--soft-yellow);
-  margin-top: 0;
+  margin: 0;
+  border-bottom: 2px solid var(--emerald-600);
 }
 
 .app-content {
@@ -145,7 +146,7 @@ p {
 .navbar-profile-link {
   border: 1px solid var(--regal-navy-600);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--tangerine-200);
   padding: 0.55rem 1rem !important;
 }
 
@@ -227,8 +228,14 @@ p {
 .create-project-button {
   width: fit-content;
   border: 1px solid var(--emerald-700);
-  background-color: var(--emerald-600);
+  background-color: var(--tangerine-200);
   color: var(--regal-navy-950);
+  border-radius: 999px;
+  transition: all 0.4s ease;
+}
+
+.create-project-button:hover {
+  transform: scale(1.1) rotate(0deg) translate(0px, 0px) skewX(0deg);
 }
 
 .role-picker {
@@ -265,6 +272,10 @@ p {
   margin: 0 !important;
 }
 
+.role-chip:hover {
+  cursor: pointer !important;
+}
+
 .role-chip input {
   margin: 0 !important;
   padding: 0 !important;
@@ -277,7 +288,7 @@ p {
 
 .role-chip-selected {
   border-color: var(--emerald-700);
-  background: var(--emerald-100);
+  background: var(--tangerine-100);
 }
 
 .film-card-wrapper {
@@ -394,6 +405,11 @@ p {
 .icon {
   padding: 0 !important;
   margin: 0 !important;
+  transition: all 0.4s ease;
+}
+
+.icon:hover {
+  transform: scale(1.1) rotate(0deg) translate(0px, 0px) skewX(0deg);
 }
 
 .side-by-side {
@@ -413,8 +429,13 @@ p {
   }
 }
 
+.link {
+  transition: all 0.4s ease;
+}
+
 .link:hover {
   cursor: pointer !important;
+  transform: scale(1.1) rotate(0deg) translate(0px, 0px) skewX(0deg);
 }
 
 .site-title-text {
