@@ -41,7 +41,8 @@ class Project(Base):
     name = Column(String(64), index=True)
     filming_dates = Column(String(120), index=True)
     description = Column(String())
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(String(128), index=True)
+    # user_id = Column(Integer, ForeignKey('user.id))
 
     def __repr__(self):
         return f'<Project {self.name}>'

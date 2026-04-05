@@ -9,13 +9,14 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const query = searchParams.get('q') ?? '';
+  const searchType = (searchParams.get('type') ?? 'project') as 'project' | 'profile';
 
   useEffect(() => {
     const loadResults = async () => {
       try {
         setLoading(true);
         setError('');
-        const data = await fetchData(query);
+        const data = await fetchData(query, searchType);
         setResults(data);
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Failed to load results');
@@ -25,12 +26,12 @@ export default function Results() {
     };
 
     loadResults();
-  }, [query]);
+  }, [query, searchType]);
 
   return (
     <>
     <div className='search-results-wrapper'>
-      <h1>Search Results{query ? ` for "${query}"` : ''}</h1>
+      <h1>{searchType === 'profile' ? 'Profile Search Results' : 'Project Search Results'}{query ? ` for "${query}"` : ''}</h1>
       {loading && <p>Searching...</p>}
       {error && <p>{error}</p>}
       {!loading && !error && results.length === 0 && <p>No matching projects found.</p>}
@@ -42,6 +43,7 @@ export default function Results() {
                     NAME={data.NAME}
                     DATES={data.DATES}
                     DESCRIPTION={data.DESCRIPTION}
+                    ROLES={data.ROLES}
                   />
                 ))}
               </div>

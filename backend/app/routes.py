@@ -2,7 +2,8 @@ from fastapi import Depends, Form, Request, status, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
 from flask import jsonify
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from sqlalchemy import String, cast, func, or_
+from pydantic import BaseModel, Field
 
 from app import app, mail
 from app.models import User, Project, Role, Skill, UserToSkill, UserToProjectToRole
@@ -10,13 +11,116 @@ from app.dependencies import get_current_user, get_db
 from flask_mail import Message
 
 
-def serialize_project(project: Project) -> dict[str, str]:
+def normalize_identifier(value: str | int | None) -> str:
+    return str(value).strip().lower() if value is not None else ""
+
+
+def owner_lookup_keys(*values: str | int | None) -> list[str]:
+    keys: list[str] = []
+    for value in values:
+        if value is None:
+            continue
+        key = str(value).strip().lower()
+        if key and key not in keys:
+            keys.append(key)
+    return keys
+
+
+def serialize_user(user: User | None) -> dict[str, str]:
+    if user is None:
+        return {
+            "USERNAME": "",
+            "FIRST_NAME": "",
+            "LAST_NAME": "",
+            "FULL_NAME": "",
+            "EMAIL": "",
+        }
+
+    full_name = " ".join(part for part in [user.first_name, user.last_name] if part).strip()
+    return {
+        "USERNAME": user.username or "",
+        "FIRST_NAME": user.first_name or "",
+        "LAST_NAME": user.last_name or "",
+        "FULL_NAME": full_name,
+        "EMAIL": user.email or "",
+    }
+
+
+def find_user_by_identifier(db: Session, identifier: str | None) -> User | None:
+    normalized = normalize_identifier(identifier)
+    if not normalized:
+        return None
+
+    return db.query(User).filter(
+        or_(
+            func.lower(User.username) == normalized,
+            func.lower(User.email) == normalized,
+            func.lower(cast(User.id, String)) == normalized,
+        )
+    ).first()
+
+
+def ensure_clerk_user(
+    db: Session,
+    *,
+    username: str | None,
+    email: str | None = None,
+    first_name: str | None = None,
+    last_name: str | None = None,
+) -> User:
+    normalized_username = normalize_identifier(username)
+    normalized_email = normalize_identifier(email)
+    user = find_user_by_identifier(db, normalized_username) or find_user_by_identifier(db, normalized_email)
+
+    if user is None:
+        user = User()
+        db.add(user)
+
+    if normalized_username:
+        user.username = normalized_username
+    elif not user.username:
+        user.username = normalized_email or "unknown"
+
+    if normalized_email:
+        user.email = normalized_email
+    elif not user.email:
+        user.email = normalized_username or ""
+
+    if first_name is not None:
+        user.first_name = first_name.strip().upper() or None
+    if last_name is not None:
+        user.last_name = last_name.strip().upper() or None
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def find_project_creator(db: Session, project: Project) -> User | None:
+    return find_user_by_identifier(db, project.user_id)
+
+
+def serialize_project(project: Project, db: Session) -> dict[str, str | list[str]]:
+    creator = find_project_creator(db, project)
+    roles_needed = db.query(Role.title).join(
+        UserToProjectToRole, Role.id == UserToProjectToRole.role_id
+    ).filter(
+        UserToProjectToRole.project_id == project.id
+    ).order_by(Role.title.asc()).all()
+
+    creator_data = serialize_user(creator)
+    owner_label = creator_data["USERNAME"] or normalize_identifier(project.user_id)
+
     return {
         "ID": str(project.id),
         "NAME": project.name,
         "DATES": project.filming_dates,
         "DESCRIPTION": project.description,
-        "USER_ID": str(project.user_id),
+        "USER_ID": owner_label,
+        "CREATOR_USERNAME": creator_data["USERNAME"],
+        "CREATOR_FULL_NAME": creator_data["FULL_NAME"],
+        "CREATOR_EMAIL": creator_data["EMAIL"],
+        "ROLES": [title for (title,) in roles_needed],
     }
 
 
@@ -25,25 +129,68 @@ class CreateProjectRequest(BaseModel):
     DATES: str
     DESCRIPTION: str
     USER_ID: str | None = None
+    OWNER_USERNAME: str | None = None
+    OWNER_EMAIL: str | None = None
+    OWNER_FIRST_NAME: str | None = None
+    OWNER_LAST_NAME: str | None = None
+    ROLE_IDS: list[int] = Field(default_factory=list)
+
+
+class ProfileResponse(BaseModel):
+    USERNAME: str
+    FIRST_NAME: str
+    LAST_NAME: str
+    FULL_NAME: str
+    EMAIL: str
+    PROJECTS: list[dict[str, str | list[str]]]
+
+
+@app.get("/api/roles", response_class=JSONResponse)
+async def api_roles(db: Session = Depends(get_db)):
+    roles = db.query(Role).order_by(Role.title.asc()).all()
+    return JSONResponse({
+        "roles": [
+            {"ID": str(role.id), "TITLE": role.title}
+            for role in roles
+        ]
+    })
 
 
 @app.get("/api/projects", response_class=JSONResponse)
 async def api_projects(
     search: str = "",
+    search_type: str = "project",
     db: Session = Depends(get_db)
 ):
     projects_query = db.query(Project)
-    search_term = search.strip().upper()
+    search_term = search.strip()
     if search_term:
         wildcard = f"%{search_term}%"
-        projects_query = projects_query.filter(
-            Project.name.ilike(wildcard)
-            | Project.description.ilike(wildcard)
-            | Project.filming_dates.ilike(wildcard)
-        )
+        if search_type == "profile":
+            matching_users = db.query(User).filter(
+                or_(
+                    User.username.ilike(wildcard),
+                    User.first_name.ilike(wildcard),
+                    User.last_name.ilike(wildcard),
+                    User.email.ilike(wildcard),
+                )
+            ).all()
+            owner_keys = owner_lookup_keys(*(user.username for user in matching_users), *(user.id for user in matching_users))
+            owner_keys.extend(owner_lookup_keys(*(user.email for user in matching_users)))
+
+            if owner_keys:
+                projects_query = projects_query.filter(func.lower(cast(Project.user_id, String)).in_(owner_keys))
+            else:
+                projects_query = projects_query.filter(Project.id == -1)
+        else:
+            projects_query = projects_query.filter(
+                Project.name.ilike(wildcard)
+                | Project.description.ilike(wildcard)
+                | Project.filming_dates.ilike(wildcard)
+            )
 
     projects = projects_query.order_by(Project.id.asc()).all()
-    return JSONResponse({"projects": [serialize_project(project) for project in projects]})
+    return JSONResponse({"projects": [serialize_project(project, db) for project in projects]})
 
 
 @app.post("/api/projects", response_class=JSONResponse, status_code=status.HTTP_201_CREATED)
@@ -51,20 +198,38 @@ async def api_create_project(
     project_data: CreateProjectRequest,
     db: Session = Depends(get_db)
 ):
-    raw_user_id = (project_data.USER_ID or "1").strip()
-    user_id = int(raw_user_id) if raw_user_id.isdigit() else 1
+    owner_username = normalize_identifier(project_data.OWNER_USERNAME or project_data.USER_ID)
+    owner_email = normalize_identifier(project_data.OWNER_EMAIL)
+    if not owner_username and owner_email:
+        owner_username = owner_email.split("@")[0]
+
+    owner_user = ensure_clerk_user(
+        db,
+        username=owner_username,
+        email=owner_email,
+        first_name=project_data.OWNER_FIRST_NAME,
+        last_name=project_data.OWNER_LAST_NAME,
+    )
 
     project = Project(
         name=project_data.NAME.strip().upper(),
         filming_dates=project_data.DATES.strip(),
         description=project_data.DESCRIPTION.strip().upper(),
-        user_id=user_id,
+        user_id=owner_user.username,
     )
     db.add(project)
     db.commit()
     db.refresh(project)
 
-    return JSONResponse(serialize_project(project), status_code=status.HTTP_201_CREATED)
+    for role_id in project_data.ROLE_IDS:
+        db.add(UserToProjectToRole(
+            user_id=owner_user.id,
+            project_id=project.id,
+            role_id=role_id,
+        ))
+    db.commit()
+
+    return JSONResponse(serialize_project(project, db), status_code=status.HTTP_201_CREATED)
 
 
 @app.get("/", response_class=JSONResponse)
@@ -74,7 +239,13 @@ async def base(
     db: Session = Depends(get_db)
 ):
     projects = db.query(Project).all()
-    your_projects = db.query(Project).filter(Project.user_id == current_user.id).all()
+    your_projects = db.query(Project).filter(
+        func.lower(cast(Project.user_id, String)).in_(owner_lookup_keys(
+            current_user.username,
+            current_user.email,
+            current_user.id,
+        ))
+    ).all()
     return ({
         "title": "Home",
         "projects": projects,
@@ -204,7 +375,7 @@ async def new_project_post(
         name=name.upper(),
         filming_dates=filming_dates,
         description=description.upper(),
-        user_id=current_user.id
+        user_id=normalize_identifier(current_user.username) or str(current_user.id)
     )
     db.add(project)
     db.commit()
@@ -229,12 +400,12 @@ async def user_profile(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(func.lower(User.username) == normalize_identifier(username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
     user_name = f"{user.first_name} {user.last_name}"
-    projects = db.query(Project).filter(Project.user_id == user.id).all()
+    projects = db.query(Project).filter(func.lower(cast(Project.user_id, String)) == normalize_identifier(user.username)).all()
     
     return ({
         "title": user_name,
@@ -254,7 +425,7 @@ async def send_contact_message(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(func.lower(User.username) == normalize_identifier(username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -287,22 +458,39 @@ async def project_display(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
-    creator = db.query(User).filter(User.id == project.user_id).first()
-    roles_needed = db.query(UserToProjectToRole).filter(
-        UserToProjectToRole.project_id == project.id
-    ).all()
-    
-    roles_needed_list = []
-    for role_rel in roles_needed:
-        role = db.query(Role).filter(Role.id == role_rel.role_id).first()
-        if role:
-            roles_needed_list.append(role.title)
+    creator = find_project_creator(db, project)
+    roles_needed_list = [
+        title for (title,) in db.query(Role.title).join(
+            UserToProjectToRole, Role.id == UserToProjectToRole.role_id
+        ).filter(
+            UserToProjectToRole.project_id == project.id
+        ).order_by(Role.title.asc()).all()
+    ]
     
     return ({
         "title": project.name,
         "creator": creator,
         "roles_needed_list": roles_needed_list,
         "project": project
+    })
+
+
+@app.get("/api/profile/{username}", response_class=JSONResponse)
+async def api_profile(
+    username: str,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(func.lower(User.username) == normalize_identifier(username)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    projects = db.query(Project).filter(
+        func.lower(cast(Project.user_id, String)) == normalize_identifier(user.username)
+    ).order_by(Project.id.asc()).all()
+
+    return JSONResponse({
+        "profile": serialize_user(user),
+        "projects": [serialize_project(project, db) for project in projects],
     })
 
 
@@ -355,7 +543,7 @@ async def project_search_result_name(
     
     results = []
     for project in projects:
-        creator = db.query(User).filter(User.id == project.user_id).first()
+        creator = find_project_creator(db, project)
         results.append({"project": project, "creator": creator})
     
     return ({
@@ -383,7 +571,7 @@ async def project_search_result_role(
     for result_id in result_ids:
         project = db.query(Project).filter(Project.id == result_id.project_id).first()
         if project:
-            creator = db.query(User).filter(User.id == project.user_id).first()
+            creator = find_project_creator(db, project)
             results.append({"project": project, "creator": creator})
     
     return ({

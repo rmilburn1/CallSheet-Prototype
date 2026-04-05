@@ -43,9 +43,17 @@ logger.info('Cast and Crew Search startup')
 DATABASE_URL = Config.SQLALCHEMY_DATABASE_URI
 if DATABASE_URL.startswith('sqlite'):
     # For sqlite, use check_same_thread=False
-    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        pool_pre_ping=True,
+    )
 else:
-    engine = create_engine(DATABASE_URL)
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=1800,
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

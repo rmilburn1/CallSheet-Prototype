@@ -24,13 +24,14 @@ import plusIconLight from './assets/light_icons/Plus.svg'
 import searchIconLight from './assets/light_icons/Search.svg'
 import sunIconLight from './assets/light_icons/Sun.svg'
 
-import { createProject, fetchData, type ProjectData } from './data.tsx'
-import { SignedIn, SignedOut, SignIn, UserButton } from '@clerk/clerk-react';
+import { createProject, fetchData, fetchRoles, type ProjectData, type RoleData } from './data.tsx'
+import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react';
 
 import { Route, Routes, useNavigate } from "react-router-dom";
 import Login from "./pages/login";
 import Film from "./pages/film";
 import Results from "./pages/results";
+import Profile from "./pages/profile.tsx";
 
 import './App.css'
 
@@ -99,6 +100,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home icons={icons}/>} />
             <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/film/:FILMID" element={<Film />} />
             <Route path="/results" element={<Results />} />
           </Routes>
@@ -133,14 +135,23 @@ function App() {
 }
 
 function Home({ icons }: { icons: ThemeIcons }) {
+  const { user } = useUser();
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [roles, setRoles] = useState<RoleData[]>([]);
+  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [dates, setDates] = useState('');
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
+  const ownerUsername = (user?.username ?? user?.primaryEmailAddress?.emailAddress?.split('@')[0] ?? user?.id ?? '').trim().toLowerCase();
+  const ownerEmail = (user?.primaryEmailAddress?.emailAddress ?? '').trim().toLowerCase();
+  const ownerFirstName = user?.firstName ?? '';
+  const ownerLastName = user?.lastName ?? '';
+  const ownerFullName = (user?.fullName ?? [ownerFirstName, ownerLastName].filter(Boolean).join(' ')).trim();
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -159,6 +170,25 @@ function Home({ icons }: { icons: ThemeIcons }) {
     loadProjects();
   }, []);
 
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        const response = await fetchRoles();
+        setRoles(response);
+      } catch {
+        setRoles([]);
+      }
+    };
+
+    loadRoles();
+  }, []);
+
+  useEffect(() => {
+    if (!showCreateForm) {
+      setSelectedRoleIds([]);
+    }
+  }, [showCreateForm]);
+
   const handleCreateSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!name.trim() || !dates.trim() || !description.trim()) {
@@ -172,7 +202,12 @@ function Home({ icons }: { icons: ThemeIcons }) {
         NAME: name.trim(),
         DATES: dates.trim(),
         DESCRIPTION: description.trim(),
-        USER_ID: '1',
+        USER_ID: ownerUsername,
+        OWNER_USERNAME: ownerUsername,
+        OWNER_EMAIL: ownerEmail,
+        OWNER_FIRST_NAME: ownerFirstName,
+        OWNER_LAST_NAME: ownerLastName,
+        ROLE_IDS: selectedRoleIds,
       });
       setProjects((prev) => [created, ...prev]);
       setName('');
@@ -186,13 +221,29 @@ function Home({ icons }: { icons: ThemeIcons }) {
     }
   };
 
-  const yourProjects = projects.filter((project) => project.USER_ID === '1');
+  const yourProjects = projects.filter((project) => {
+    const projectOwner = (project.USER_ID ?? '').trim().toLowerCase();
+    return projectOwner === ownerUsername || projectOwner === ownerEmail || projectOwner === ownerFullName.toLowerCase();
+  });
+
+  const toggleRole = (roleId: string) => {
+    setSelectedRoleIds((previous) => (
+      previous.includes(roleId)
+        ? previous.filter((selectedRoleId) => selectedRoleId !== roleId)
+        : [...previous, roleId]
+    ));
+  };
+
+  const navigate = useNavigate();
 
   return (
     <>
       {showCreateForm && (
         <form className='create-project-form' onSubmit={handleCreateSubmit}>
           <h4>Create a New Project</h4>
+          <div className='creator-summary'>
+            <p className='creator-summary-label'>Posting as <strong>{ownerUsername || 'Signed-in Clerk user'}</strong></p>
+          </div>
           <input
             className='create-project-input'
             placeholder='Project Name'
@@ -207,10 +258,32 @@ function Home({ icons }: { icons: ThemeIcons }) {
           />
           <textarea
             className='create-project-input create-project-textarea'
-            placeholder='Description'
+            placeholder='Description (please add logline and acting roles here)'
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
+          <section className='role-picker'>
+            <div className='role-picker-header'>
+              <h5>Needed Roles</h5>
+              <span>{selectedRoleIds.length} selected</span>
+            </div>
+            <div className='role-picker-grid'>
+              {roles.map((role) => {
+                const isSelected = selectedRoleIds.includes(role.ID);
+                return (
+                  <label key={role.ID} className={`role-chip ${isSelected ? 'role-chip-selected' : ''}`}>
+                    <input
+                      className='role-input'
+                      type='checkbox'
+                      checked={isSelected}
+                      onChange={() => toggleRole(role.ID)}
+                    />
+                    <span className='role-text'>{role.TITLE}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </section>
           <button type='submit' className='create-project-button' disabled={isCreating}>
             {isCreating ? 'Saving...' : 'Save Project'}
           </button>
@@ -225,7 +298,7 @@ function Home({ icons }: { icons: ThemeIcons }) {
               loading={loading}
               onIconClick={() => setShowCreateForm((previous) => !previous)}
             />
-            <Projects name="All Projects" icon={icons.go} projects={projects} loading={loading}/>
+            <Projects name="All Projects" icon={icons.go} projects={projects} loading={loading} onIconClick={() => navigate('/results')}/>
       </div>
     </>
   )
@@ -239,7 +312,7 @@ function Home({ icons }: { icons: ThemeIcons }) {
 
 export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState('projects');
+  const [searchType, setSearchType] = useState<'project' | 'profile'>('project');
   const [searchTerm, setSearchTerm] = useState('');
 
   const goHome = () => {
@@ -263,14 +336,14 @@ export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
         <select
           className='search-selector link'
           value={searchType}
-          onChange={(event) => setSearchType(event.target.value)}
+          onChange={(event) => setSearchType(event.target.value as 'project' | 'profile')}
         >
-          <option value='projects'>Projects</option>
-          <option value='people'>People</option>
+          <option value='project'>Project names</option>
+          <option value='profile'>Profiles</option>
         </select>
         <input
           className='search-field'
-          placeholder='Search for projects or people'
+          placeholder={searchType === 'project' ? 'Search project names' : 'Search profiles'}
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
           onKeyDown={(event) => {
@@ -287,6 +360,9 @@ export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
         alt="Theme icon"
         onClick={onThemeToggle}
       />
+      <button type='button' className='navbar-profile-link link' onClick={() => navigate('/profile')}>
+        My Profile
+      </button>
       <UserButton />
     </div>
   )
@@ -316,7 +392,7 @@ export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
   );
 }; */
 
-export const FilmCard = ({ NAME, DATES, DESCRIPTION, FILMID }: { NAME?: string; DATES?: string; DESCRIPTION?: string; FILMID?: string }) => {
+export const FilmCard = ({ NAME, DATES, DESCRIPTION, FILMID, ROLES }: { NAME?: string; DATES?: string; DESCRIPTION?: string; FILMID?: string; ROLES?: string[] }) => {
   const navigate = useNavigate();
   
   if (!NAME) return <div />;
@@ -338,7 +414,7 @@ export const FilmCard = ({ NAME, DATES, DESCRIPTION, FILMID }: { NAME?: string; 
           {DESCRIPTION}
         </p>
         <p className='film-details'>
-          Roles
+          {ROLES && ROLES.length > 0 ? ROLES.join(' · ') : 'No roles selected'}
         </p>
       </div>
     </>
@@ -382,6 +458,7 @@ function Projects({
               NAME={data.NAME}
               DATES={data.DATES}
               DESCRIPTION={data.DESCRIPTION}
+              ROLES={data.ROLES}
             />
           ))}
         </div>
