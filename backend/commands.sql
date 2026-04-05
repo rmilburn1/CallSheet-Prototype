@@ -1,1 +1,1 @@
-DELETE FROM project;
+DELETE FROM user_to_project_to_role;
