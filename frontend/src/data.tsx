@@ -55,10 +55,19 @@ type CreateProjectInput = {
   ROLE_IDS?: string[];
 };
 
+type SyncClerkUserInput = {
+  USERNAME?: string;
+  EMAIL?: string;
+  FIRST_NAME?: string;
+  LAST_NAME?: string;
+  FULL_NAME?: string;
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 const PROJECTS_ENDPOINT = `${API_BASE_URL}/api/projects`;
 const ROLES_ENDPOINT = `${API_BASE_URL}/api/roles`;
 const PROFILE_ENDPOINT = `${API_BASE_URL}/api/profile`;
+const CLERK_SYNC_ENDPOINT = `${API_BASE_URL}/api/clerk/sync-user`;
 
 async function ensureJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -138,4 +147,24 @@ export async function createProject(input: CreateProjectInput): Promise<ProjectD
   });
 
   return ensureJson<ProjectData>(response);
+}
+
+export async function syncClerkUser(input: SyncClerkUserInput): Promise<void> {
+  const response = await fetch(CLERK_SYNC_ENDPOINT, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      USERNAME: input.USERNAME ?? '',
+      EMAIL: input.EMAIL ?? '',
+      FIRST_NAME: input.FIRST_NAME ?? '',
+      LAST_NAME: input.LAST_NAME ?? '',
+      FULL_NAME: input.FULL_NAME ?? '',
+    }),
+  });
+
+  await ensureJson<{ user: ProfileData }>(response);
 }

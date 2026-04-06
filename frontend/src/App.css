@@ -43,6 +43,10 @@
   /*background-image: linear-gradient(to top left, var(--emerald-50), var(--emerald-100));*/
   background-color: var(--soft-yellow);
   /*animation: bg-gradient 5s infinite;*/
+
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 [data-theme="dark"] {
@@ -71,8 +75,25 @@
 
 [class*="clerk"],
 [class*="cl-"] {
+  padding: 4px !important;
+  margin: 0 !important;
+  border-radius: 1rem;
+}
+
+.cl-avatarImage, .cl-userButtonAvatarImage {
+  border-radius: 999px !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+.cl-signIn-root {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.cl-userButton-root {
+  
 }
 
 h1 {
@@ -384,7 +405,7 @@ p {
 }
 
 .projects-wrapper {
-
+  width: 100%;
 }
 
 .projects-header {
@@ -414,7 +435,18 @@ p {
 
 .side-by-side {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(2, minmax(360px, 520px));
+  justify-content: center;
+  align-items: start;
+  gap: 1.5rem;
+  width: min(100%, 1160px);
+  margin: 0 auto;
+}
+
+@media (max-width: 980px) {
+  .side-by-side {
+    grid-template-columns: minmax(280px, 1fr);
+  }
 }
 
 @keyframes bg-gradient {
@@ -439,6 +471,7 @@ p {
 }
 
 .site-title-text {
+  padding: 0px !important;
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 

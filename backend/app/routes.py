@@ -136,6 +136,14 @@ class CreateProjectRequest(BaseModel):
     ROLE_IDS: list[int] = Field(default_factory=list)
 
 
+class SyncClerkUserRequest(BaseModel):
+    USERNAME: str | None = None
+    EMAIL: str | None = None
+    FIRST_NAME: str | None = None
+    LAST_NAME: str | None = None
+    FULL_NAME: str | None = None
+
+
 class ProfileResponse(BaseModel):
     USERNAME: str
     FIRST_NAME: str
@@ -143,6 +151,49 @@ class ProfileResponse(BaseModel):
     FULL_NAME: str
     EMAIL: str
     PROJECTS: list[dict[str, str | list[str]]]
+
+
+def split_full_name(full_name: str | None) -> tuple[str | None, str | None]:
+    cleaned = (full_name or "").strip()
+    if not cleaned:
+        return None, None
+
+    parts = cleaned.split()
+    if len(parts) == 1:
+        return parts[0], None
+    return parts[0], " ".join(parts[1:])
+
+
+@app.post("/api/clerk/sync-user", response_class=JSONResponse)
+async def api_sync_clerk_user(
+    payload: SyncClerkUserRequest,
+    db: Session = Depends(get_db)
+):
+    normalized_username = normalize_identifier(payload.USERNAME)
+    normalized_email = normalize_identifier(payload.EMAIL)
+
+    if not normalized_username and normalized_email:
+        normalized_username = normalized_email.split("@")[0]
+
+    first_name = (payload.FIRST_NAME or "").strip() or None
+    last_name = (payload.LAST_NAME or "").strip() or None
+    if not first_name and not last_name:
+        split_first, split_last = split_full_name(payload.FULL_NAME)
+        first_name = split_first
+        last_name = split_last
+
+    if not normalized_username and not normalized_email:
+        raise HTTPException(status_code=400, detail="USERNAME or EMAIL is required")
+
+    user = ensure_clerk_user(
+        db,
+        username=normalized_username,
+        email=normalized_email,
+        first_name=first_name,
+        last_name=last_name,
+    )
+
+    return JSONResponse({"user": serialize_user(user)})
 
 
 @app.get("/api/roles", response_class=JSONResponse)

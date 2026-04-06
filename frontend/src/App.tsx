@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import bookmarkIcon from './assets/Bookmark.svg'
@@ -24,7 +24,7 @@ import plusIconLight from './assets/light_icons/Plus.svg'
 import searchIconLight from './assets/light_icons/Search.svg'
 import sunIconLight from './assets/light_icons/Sun.svg'
 
-import { createProject, fetchData, fetchRoles, type ProjectData, type RoleData } from './data.tsx'
+import { createProject, fetchData, fetchRoles, syncClerkUser, type ProjectData, type RoleData } from './data.tsx'
 import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react';
 
 import { Route, Routes, useNavigate } from "react-router-dom";
@@ -78,8 +78,40 @@ const iconsByTheme: Record<Theme, ThemeIcons> = {
 };
 
 function App() {
+  const { user, isLoaded, isSignedIn } = useUser();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const icons = iconsByTheme[theme];
+  const lastSyncedUserId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) {
+      return;
+    }
+
+    if (lastSyncedUserId.current === user.id) {
+      return;
+    }
+
+    const username = (user.username ?? user.primaryEmailAddress?.emailAddress?.split('@')[0] ?? user.id ?? '').trim().toLowerCase();
+    const email = (user.primaryEmailAddress?.emailAddress ?? '').trim().toLowerCase();
+
+    const syncUser = async () => {
+      try {
+        await syncClerkUser({
+          USERNAME: username,
+          EMAIL: email,
+          FIRST_NAME: user.firstName ?? '',
+          LAST_NAME: user.lastName ?? '',
+          FULL_NAME: user.fullName ?? '',
+        });
+        lastSyncedUserId.current = user.id;
+      } catch {
+        // Fail silently to avoid blocking login UX if sync is temporarily unavailable.
+      }
+    };
+
+    syncUser();
+  }, [isLoaded, isSignedIn, user]);
 
   const toggleTheme = () => {
     setTheme((prev) => {
