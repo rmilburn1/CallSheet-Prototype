@@ -1,112 +1,66 @@
-2023-11-07 13:39:54,966 ERROR: Exception on / [GET] [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py:825]
-Traceback (most recent call last):
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
-    self.dialect.do_execute(
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 922, in do_execute
-    cursor.execute(statement, parameters)
-sqlite3.OperationalError: no such table: user
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 1455, in wsgi_app
-    response = self.full_dispatch_request()
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 869, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
-    rv = self.dispatch_request()
-         ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/routes.py", line 11, in base
-    return render_template('base.html', title='Home')
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/templating.py", line 152, in render_template
-    return _render(app, template, context)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/templating.py", line 129, in _render
-    app.update_template_context(context)
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 480, in update_template_context
-    context.update(self.ensure_sync(func)())
-                   ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask_login/utils.py", line 405, in _user_context_processor
-    return dict(current_user=_get_user())
-                             ^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask_login/utils.py", line 370, in _get_user
-    current_app.login_manager._load_user()
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask_login/login_manager.py", line 364, in _load_user
-    user = self._user_callback(user_id)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/models.py", line 30, in load_user
-    return User.query.get(int(id))
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "<string>", line 2, in get
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/util/deprecations.py", line 386, in warned
-    return fn(*args, **kwargs)  # type: ignore[no-any-return]
-           ^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 1136, in get
-    return self._get_impl(ident, loading.load_on_pk_identity)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 1145, in _get_impl
-    return self.session._get_impl(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 3833, in _get_impl
-    return db_load_fn(
-           ^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/loading.py", line 690, in load_on_pk_identity
-    session.execute(
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2308, in execute
-    return self._execute_internal(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2190, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 293, in orm_execute_statement
-    result = conn.execute(
-             ^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
-    return meth(
-           ^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 516, in _execute_on_connection
-    return connection._execute_clauseelement(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1639, in _execute_clauseelement
-    ret = self._execute_context(
-          ^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
-    return self._exec_single_context(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
-    self._handle_dbapi_exception(
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2343, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
-    self.dialect.do_execute(
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 922, in do_execute
-    cursor.execute(statement, parameters)
-sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: user
-[SQL: SELECT user.id AS user_id, user.first_name AS user_first_name, user.last_name AS user_last_name, user.pronouns AS user_pronouns, user.email AS user_email, user.phone AS user_phone, user.major AS user_major, user.minor AS user_minor, user.grad_year AS user_grad_year, user.password_hash AS user_password_hash 
-FROM user 
-WHERE user.id = ?]
-[parameters: (5,)]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-2023-11-07 13:47:54,977 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:48:00,880 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:48:06,581 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 14:17:27,700 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 14:17:33,055 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 14:17:37,090 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:45:53,093 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:45:59,771 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:46:09,904 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:46:15,527 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:46:26,962 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:47:32,096 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:47:36,362 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:47:43,263 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:48:15,062 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:48:21,136 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-13 13:48:26,831 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-14 13:51:41,197 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-14 13:51:46,577 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-14 13:52:21,177 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-14 13:53:07,403 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-14 13:53:38,398 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-14 13:53:45,422 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-29 13:27:53,622 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2023-11-29 13:27:56,669 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
+2026-02-08 22:14:51,450 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:45]
+2026-02-08 22:17:06,242 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:45]
+2026-02-08 22:24:41,654 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:41,671 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:41,671 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:51,063 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:51,106 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:51,106 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:56,189 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:56,215 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:24:56,215 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:25:03,475 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:25:03,497 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:25:03,497 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:27:13,281 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:28:59,194 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:29:25,634 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:29:59,811 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:33:17,367 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-08 22:34:56,279 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CastAndCrewSearch copy/app/__init__.py:26]
+2026-02-20 13:18:40,454 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:20:04,882 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:20:42,246 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:21:14,059 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:22:39,349 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:24:15,694 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:24:32,724 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:24:47,303 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:26:19,230 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:26:45,352 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:26:59,969 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:27:57,672 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 13:28:14,988 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:05:03,292 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:06:43,578 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:07:20,524 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:07:35,403 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:07:50,825 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:07:57,634 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:09:16,854 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-02-20 14:09:35,648 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/Senior Project/CallSheet Prototype/backend/app/__init__.py:40]
+2026-04-05 14:48:41,227 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 14:53:18,012 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 14:54:29,763 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 14:57:12,166 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 15:23:28,878 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 15:27:35,270 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 15:27:59,177 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 15:47:46,510 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 16:10:52,621 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 16:56:13,241 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 17:00:27,366 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 17:02:31,616 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-05 17:05:56,905 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-06 10:10:21,364 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-06 11:21:18,796 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-06 11:24:15,077 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]
+2026-04-06 11:29:58,357 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/Semester 8/Senior Project/CallSheet-Prototype/backend/app/__init__.py:40]

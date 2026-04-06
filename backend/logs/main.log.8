@@ -1,4 +1,4 @@
-2023-11-07 13:34:44,669 ERROR: Exception on /register [GET] [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py:825]
+2023-11-07 13:33:19,814 ERROR: Exception on /login [GET] [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py:825]
 Traceback (most recent call last):
   File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
     self.dialect.do_execute(
@@ -21,7 +21,7 @@ Traceback (most recent call last):
   File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/routes.py", line 11, in register
+  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/routes.py", line 33, in login
     if current_user.is_authenticated:
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/werkzeug/local.py", line 316, in __get__
@@ -91,9 +91,4 @@ FROM user
 WHERE user.id = ?]
 [parameters: (5,)]
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
-2023-11-07 13:35:31,062 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:26:41,307 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:31:23,999 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:33:46,311 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:35:18,891 INFO: Cast and Crew Search startup [in /Users/raymilburn/Downloads/College/Semester 3/CS205/CastAndCrewSearch/app/__init__.py:48]
-2023-11-07 13:36:02,738 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
+2023-11-07 13:33:50,745 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]

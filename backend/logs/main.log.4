@@ -1,4 +1,4 @@
-2023-11-07 13:36:04,151 ERROR: Exception on / [GET] [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py:825]
+2023-11-07 13:36:58,345 ERROR: Exception on / [GET] [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py:825]
 Traceback (most recent call last):
   File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
     self.dialect.do_execute(
@@ -21,7 +21,7 @@ Traceback (most recent call last):
   File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request
     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/routes.py", line 10, in base
+  File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/routes.py", line 11, in base
     return render_template('base.html', title='Home')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/venv/lib/python3.11/site-packages/flask/templating.py", line 152, in render_template
@@ -93,4 +93,4 @@ FROM user
 WHERE user.id = ?]
 [parameters: (5,)]
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
-2023-11-07 13:36:57,115 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
+2023-11-07 13:37:33,881 INFO: Cast and Crew Search startup [in /Users/baneetpukhrambam/PycharmProjects/CastAndCrewSearch/app/__init__.py:48]
