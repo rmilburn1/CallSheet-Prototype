@@ -271,55 +271,61 @@ function Home({ icons }: { icons: ThemeIcons }) {
   return (
     <>
       {showCreateForm && (
-        <form className='create-project-form' onSubmit={handleCreateSubmit}>
-          <h4>Create a New Project</h4>
-          <div className='creator-summary'>
-            <p className='creator-summary-label'>Posting as <strong>{ownerUsername || 'Signed-in Clerk user'}</strong></p>
-          </div>
-          <input
-            className='create-project-input'
-            placeholder='Project Name'
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-          <input
-            className='create-project-input'
-            placeholder='Filming Dates'
-            value={dates}
-            onChange={(event) => setDates(event.target.value)}
-          />
-          <textarea
-            className='create-project-input create-project-textarea'
-            placeholder='Description (please add logline and acting roles here)'
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-          <section className='role-picker'>
-            <div className='role-picker-header'>
-              <h5>Needed Roles</h5>
-              <span>{selectedRoleIds.length} selected</span>
+        <div className='create-project-overlay' onClick={() => setShowCreateForm(false)}>
+          <form
+            className='create-project-form'
+            onSubmit={handleCreateSubmit}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h4>Create a New Project</h4>
+            <div className='creator-summary'>
+              <p className='creator-summary-label'>Posting as <strong>{ownerUsername || 'Signed-in Clerk user'}</strong></p>
             </div>
-            <div className='role-picker-grid'>
-              {roles.map((role) => {
-                const isSelected = selectedRoleIds.includes(role.ID);
-                return (
-                  <label key={role.ID} className={`role-chip ${isSelected ? 'role-chip-selected' : ''}`}>
-                    <input
-                      className='role-input'
-                      type='checkbox'
-                      checked={isSelected}
-                      onChange={() => toggleRole(role.ID)}
-                    />
-                    <span className='role-text'>{role.TITLE}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </section>
-          <button type='submit' className='create-project-button' disabled={isCreating}>
-            {isCreating ? 'Saving...' : 'Save Project'}
-          </button>
-        </form>
+            <input
+              className='create-project-input'
+              placeholder='Project Name'
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+            <input
+              className='create-project-input'
+              placeholder='Filming Dates'
+              value={dates}
+              onChange={(event) => setDates(event.target.value)}
+            />
+            <textarea
+              className='create-project-input create-project-textarea'
+              placeholder='Description (please add logline and acting roles here)'
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+            <section className='role-picker'>
+              <div className='role-picker-header'>
+                <h5>Needed Roles</h5>
+                <span>{selectedRoleIds.length} selected</span>
+              </div>
+              <div className='role-picker-grid'>
+                {roles.map((role) => {
+                  const isSelected = selectedRoleIds.includes(role.ID);
+                  return (
+                    <label key={role.ID} className={`role-chip ${isSelected ? 'role-chip-selected' : ''}`}>
+                      <input
+                        className='role-input'
+                        type='checkbox'
+                        checked={isSelected}
+                        onChange={() => toggleRole(role.ID)}
+                      />
+                      <span className='role-text'>{role.TITLE}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </section>
+            <button type='submit' className='create-project-button' disabled={isCreating}>
+              {isCreating ? 'Saving...' : 'Save Project'}
+            </button>
+          </form>
+        </div>
       )}
       {error && <p>{error}</p>}
       <div className='side-by-side'>
