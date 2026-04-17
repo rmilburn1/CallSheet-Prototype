@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Integ
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User
 
-
+"""
 class RegistrationForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
@@ -30,7 +30,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
-
+"""
 
 class NewProjectForm(FlaskForm):
     name = StringField('Project Name', validators=[DataRequired()])
@@ -59,9 +59,10 @@ class ProfileSearchSkillForm(FlaskForm):
     profile_skill = SelectField('Profile Skill')
     submit2 = SubmitField('Submit')
 
-
+"""
 class ContactForm(FlaskForm):
     name = StringField(label='Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     message = TextAreaField(label='Message')
     submit = SubmitField(label="Submit")
+"""

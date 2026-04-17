@@ -733,7 +733,7 @@ async def logout(current_user: User = Depends(get_current_user)):
     response.delete_cookie("user_id")
     return response
 
-
+"""
 @app.get("/reset_db")
 async def reset_db(db: Session = Depends(get_db)):
     # Delete all data
@@ -806,4 +806,4 @@ async def reset_db(db: Session = Depends(get_db)):
     
     db.commit()
     
-    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)"""
