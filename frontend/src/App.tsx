@@ -350,7 +350,7 @@ function Home({ icons }: { icons: ThemeIcons }) {
 
 export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState<'project' | 'profile'>('project');
+  const [searchType, setSearchType] = useState<'project' | 'profile' | 'roles'>('project');
   const [searchTerm, setSearchTerm] = useState('');
 
   const goHome = () => {
@@ -374,14 +374,19 @@ export function Navbar({ onThemeToggle, currentTheme, icons }: NavbarProps) {
         <select
           className='search-selector link'
           value={searchType}
-          onChange={(event) => setSearchType(event.target.value as 'project' | 'profile')}
+          onChange={(event) => setSearchType(event.target.value as 'project' | 'profile' | 'roles')}
         >
           <option value='project'>Projects</option>
           <option value='profile'>Profiles</option>
+          <option value='roles'>Roles</option>
         </select>
         <input
           className='search-field'
-          placeholder={searchType === 'project' ? 'Search project names' : 'Search profiles'}
+          placeholder={searchType === 'project'
+            ? 'Search projects'
+            : searchType === 'profile'
+              ? 'Search profiles'
+              : 'Search roles'}
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
           onKeyDown={(event) => {

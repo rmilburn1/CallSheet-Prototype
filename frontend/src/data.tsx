@@ -78,7 +78,7 @@ async function ensureJson<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export async function fetchData(search = '', searchType: 'project' | 'profile' = 'project'): Promise<ProjectData[]> {
+export async function fetchData(search = '', searchType: 'project' | 'profile' | 'roles' = 'project'): Promise<ProjectData[]> {
   const query = search.trim();
   const endpoint = query
     ? `${PROJECTS_ENDPOINT}?search=${encodeURIComponent(query)}&search_type=${encodeURIComponent(searchType)}`
@@ -117,6 +117,10 @@ export async function fetchProfile(username: string): Promise<ProfileData> {
       Accept: 'application/json',
     },
   });
+
+  if (response.status === 404) {
+    throw new Error('User not found');
+  }
 
   const payload = await ensureJson<ProfileResponse>(response);
   return {

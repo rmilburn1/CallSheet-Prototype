@@ -233,6 +233,14 @@ async def api_projects(
                 projects_query = projects_query.filter(func.lower(cast(Project.user_id, String)).in_(owner_keys))
             else:
                 projects_query = projects_query.filter(Project.id == -1)
+        elif search_type == "roles":
+            projects_query = db.query(Project).join(
+                UserToProjectToRole, UserToProjectToRole.project_id == Project.id
+            ).join(
+                Role, Role.id == UserToProjectToRole.role_id
+            ).filter(
+                Role.title.ilike(wildcard)
+            ).distinct()
         else:
             projects_query = projects_query.filter(
                 Project.name.ilike(wildcard)
