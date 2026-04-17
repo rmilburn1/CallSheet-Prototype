@@ -164,6 +164,14 @@ def split_full_name(full_name: str | None) -> tuple[str | None, str | None]:
     return parts[0], " ".join(parts[1:])
 
 
+def can_manage_project(project: Project, current_user: User) -> bool:
+    return normalize_identifier(project.user_id) in owner_lookup_keys(
+        current_user.username,
+        current_user.email,
+        current_user.id,
+    )
+
+
 @app.post("/api/clerk/sync-user", response_class=JSONResponse)
 async def api_sync_clerk_user(
     payload: SyncClerkUserRequest,
@@ -289,6 +297,25 @@ async def api_create_project(
     db.commit()
 
     return JSONResponse(serialize_project(project, db), status_code=status.HTTP_201_CREATED)
+
+
+@app.delete("/api/projects/{project_id}", response_class=JSONResponse)
+async def api_delete_project(
+    project_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    if not can_manage_project(project, current_user):
+        raise HTTPException(status_code=403, detail="You can only delete your own projects")
+
+    db.query(UserToProjectToRole).filter(UserToProjectToRole.project_id == project.id).delete(synchronize_session=False)
+    db.delete(project)
+    db.commit()
+    return JSONResponse({"message": "Project deleted"})
 
 
 @app.get("/", response_class=JSONResponse)

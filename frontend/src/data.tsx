@@ -153,6 +153,18 @@ export async function createProject(input: CreateProjectInput): Promise<ProjectD
   return ensureJson<ProjectData>(response);
 }
 
+export async function deleteProject(projectId: string): Promise<void> {
+  const response = await fetch(`${PROJECTS_ENDPOINT}/${encodeURIComponent(projectId)}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  await ensureJson<{ message: string }>(response);
+}
+
 export async function syncClerkUser(input: SyncClerkUserInput): Promise<void> {
   const response = await fetch(CLERK_SYNC_ENDPOINT, {
     method: 'POST',
