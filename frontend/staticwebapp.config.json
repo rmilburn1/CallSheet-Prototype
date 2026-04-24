@@ -3,7 +3,7 @@
     {
       "route": "/api/*",
       "allowedRoles": ["anonymous"],
-      "rewrite": "https://callsheet.azurewebsites.net/api/*"
+      "rewrite": "https://callsheet.azurewebsites.net/*"
     }
   ]
 }
