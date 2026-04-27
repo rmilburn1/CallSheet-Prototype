@@ -29,7 +29,10 @@ export default function Profile() {
     try {
       setWorkingProjectId(projectId);
       setError('');
-      await deleteProject(projectId);
+      await deleteProject(projectId, {
+        OWNER_USERNAME: username,
+        OWNER_EMAIL: email,
+      });
       setProfile((current) => {
         if (!current) {
           return current;

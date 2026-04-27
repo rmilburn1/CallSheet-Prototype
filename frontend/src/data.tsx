@@ -63,6 +63,11 @@ type SyncClerkUserInput = {
   FULL_NAME?: string;
 };
 
+type DeleteProjectInput = {
+  OWNER_USERNAME?: string;
+  OWNER_EMAIL?: string;
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 const PROJECTS_ENDPOINT = `${API_BASE_URL}/api/projects`;
 const ROLES_ENDPOINT = `${API_BASE_URL}/api/roles`;
@@ -153,12 +158,26 @@ export async function createProject(input: CreateProjectInput): Promise<ProjectD
   return ensureJson<ProjectData>(response);
 }
 
-export async function deleteProject(projectId: string): Promise<void> {
-  const response = await fetch(`${PROJECTS_ENDPOINT}/${encodeURIComponent(projectId)}`, {
+export async function deleteProject(projectId: string, input?: DeleteProjectInput): Promise<void> {
+  const params = new URLSearchParams();
+  if (input?.OWNER_USERNAME) {
+    params.set('owner_username', input.OWNER_USERNAME);
+  }
+  if (input?.OWNER_EMAIL) {
+    params.set('owner_email', input.OWNER_EMAIL);
+  }
+
+  const endpoint = params.toString()
+    ? `${PROJECTS_ENDPOINT}/${encodeURIComponent(projectId)}?${params.toString()}`
+    : `${PROJECTS_ENDPOINT}/${encodeURIComponent(projectId)}`;
+
+  const response = await fetch(endpoint, {
     method: 'DELETE',
     credentials: 'include',
     headers: {
       Accept: 'application/json',
+      ...(input?.OWNER_USERNAME ? { 'X-Owner-Username': input.OWNER_USERNAME } : {}),
+      ...(input?.OWNER_EMAIL ? { 'X-Owner-Email': input.OWNER_EMAIL } : {}),
     },
   });
 

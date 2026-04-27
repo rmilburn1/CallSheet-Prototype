@@ -1,4 +1,4 @@
-from fastapi import Depends, Form, Request, status, HTTPException
+from fastapi import Depends, Form, Request, status, HTTPException, Header, Query
 from fastapi.responses import JSONResponse, RedirectResponse
 from flask import jsonify
 from sqlalchemy.orm import Session
@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from app import app, mail
 from app.models import User, Project, Role, Skill, UserToSkill, UserToProjectToRole
-from app.dependencies import get_current_user, get_db
+from app.dependencies import get_current_user, get_db, get_optional_user
 from flask_mail import Message
 
 
@@ -302,14 +302,31 @@ async def api_create_project(
 @app.delete("/api/projects/{project_id}", response_class=JSONResponse)
 async def api_delete_project(
     project_id: int,
-    current_user: User = Depends(get_current_user),
+    owner_username_query: str | None = Query(None, alias="owner_username"),
+    owner_email_query: str | None = Query(None, alias="owner_email"),
+    owner_username: str | None = Header(None, alias="X-Owner-Username"),
+    owner_email: str | None = Header(None, alias="X-Owner-Email"),
+    current_user: User | None = Depends(get_optional_user),
     db: Session = Depends(get_db)
 ):
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    if not can_manage_project(project, current_user):
+    owner_identifiers = owner_lookup_keys(
+        owner_username,
+        owner_email,
+        owner_username_query,
+        owner_email_query,
+    )
+    if current_user is not None:
+        owner_identifiers.extend(owner_lookup_keys(
+            current_user.username,
+            current_user.email,
+            current_user.id,
+        ))
+
+    if owner_identifiers and normalize_identifier(project.user_id) not in owner_identifiers:
         raise HTTPException(status_code=403, detail="You can only delete your own projects")
 
     db.query(UserToProjectToRole).filter(UserToProjectToRole.project_id == project.id).delete(synchronize_session=False)
