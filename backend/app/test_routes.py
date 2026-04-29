@@ -140,34 +140,3 @@ def test_logout(client):
     response = client.get("/logout")
     assert response.status_code == 200
 
-
-'''from fastapi.testclient import TestClient
-from app import app
-
-client = TestClient(app)
-
-def test_base_route():
-    response = client.get("/")
-    data = response.json()
-    assert response.json()["title"] == "Home"
-    assert response.json()["projects"] in data
-    assert response.json()["user"] in data
-    assert response.json()["your_projects"] in data
-
-def test_register_get():
-    response = client.get("/register")
-    data = response.json()
-    assert "skills" in data
-    assert response.json()["title"] == "Register"
-
-def test_login_get():
-    response = client.get("/login")
-    data = response.json()
-    assert response.json()["title"] == "Sign In"
-
-def test_new_project_get():
-    response = client.get("/new_project")
-    data = response.json()
-    assert response.json()["title"] == "Create New Project"
-    assert "roles" in data'''
-
