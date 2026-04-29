@@ -7,11 +7,10 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from config import Config
-from flask_mail import Mail
 from fastapi.middleware.cors import CORSMiddleware
 
 # Initialize FastAPI app
-app = FastAPI(title="Cast and Crew Search")
+app = FastAPI(title="CallSheet")
 
 origins = [
     "http://localhost:5173",
@@ -63,17 +62,6 @@ Base.metadata.create_all(bind=engine)
 
 # Setup templates
 templates = Jinja2Templates(directory="app/templates")
-
-# Email configuration (using Flask-Mail for compatibility)
-from flask import Flask as FlaskApp
-flask_app = FlaskApp(__name__)
-flask_app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-flask_app.config['MAIL_PORT'] = 465
-flask_app.config['MAIL_USERNAME'] = 'cs205testingfall23@gmail.com'
-flask_app.config['MAIL_PASSWORD'] = 'rdts ytre umge ayks'
-flask_app.config['MAIL_USE_TLS'] = False
-flask_app.config['MAIL_USE_SSL'] = True
-mail = Mail(flask_app)
 
 # Mount static files if they exist
 import os.path
