@@ -8,10 +8,10 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    _raw_database_url = os.environ.get('DATABASE_URL', '').strip()
+    _raw_database_url = os.environ.get('DATABASE_URL', 'postgresql://postgres:pukh1jbur@localhost:5432/CallSheet').strip()
     if _raw_database_url.startswith('postgres://'):
         _raw_database_url = _raw_database_url.replace('postgres://', 'postgresql://', 1)
 
-    SQLALCHEMY_DATABASE_URI = _raw_database_url or ('sqlite:///' + os.path.join(basedir, 'app.db'))
+    SQLALCHEMY_DATABASE_URI = _raw_database_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

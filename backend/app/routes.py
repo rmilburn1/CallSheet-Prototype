@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import String, cast, func, or_
 from pydantic import BaseModel, Field
 
-from app import app, mail
+from app import app
 from app.models import User, Project, Role, Skill, UserToSkill, UserToProjectToRole
 from app.dependencies import get_current_user, get_db, get_optional_user
 from flask_mail import Message
