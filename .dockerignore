@@ -1,0 +1,17 @@
+.git
+.github
+.DS_Store
+.venv
+backend/.venv
+backend/__pycache__
+backend/.pytest_cache
+backend/logs
+backend/app.db
+backend/my_local_db_backup.dump
+frontend/node_modules
+frontend/dist
+frontend/.vite
+logs
+*.log
+*.log.*
+.idea

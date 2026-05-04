@@ -1,16 +1,20 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
+
+FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --no-cache-dir --upgrade pip
+
 COPY requirements.txt ./
-RUN python -m pip install --no-cache-dir -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip install --no-cache-dir -r requirements.txt
+COPY backend/ .
 
-COPY . .
-
-# Keep database/log directories explicit for mounted volumes.
 RUN mkdir -p /app/data /app/logs
 
 EXPOSE 8000

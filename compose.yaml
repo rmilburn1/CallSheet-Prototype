@@ -1,28 +1,30 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: callsheet-backend
+    env_file:
+      - ./backend/.env
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: sqlite:////app/app.db
     volumes:
-      - ./backend/app.db:/app/app.db
       - backend_logs:/app/logs
 
   frontend:
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: callsheet-frontend
     depends_on:
       - backend
     env_file:
       - ./frontend/.env
-    ports:
-      - "5173:5173"
     environment:
       VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
 
 volumes:
+  backend_db:
   backend_logs:

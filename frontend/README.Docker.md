@@ -1,22 +1,22 @@
-### Building and running your application
+# Frontend Docker
 
-When you're ready, start your application by running:
-`docker compose up --build`.
+## Build
 
-Your application will be available at http://localhost:5137.
+```bash
+docker build -f frontend/Dockerfile -t callsheet-frontend .
+```
 
-### Deploying your application to the cloud
+## Run
 
-First, build your image, e.g.: `docker build -t myapp .`.
-If your cloud uses a different CPU architecture than your development
-machine (e.g., you are on a Mac M1 and your cloud provider is amd64),
-you'll want to build the image for that platform, e.g.:
-`docker build --platform=linux/amd64 -t myapp .`.
+```bash
+docker run --rm -p 5173:5173 \
+  --env-file ./frontend/.env \
+  -e VITE_API_BASE_URL=http://localhost:8000 \
+  callsheet-frontend
+```
 
-Then, push it to your registry, e.g. `docker push myregistry.com/myapp`.
+## Notes
 
-Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
-docs for more detail on building and pushing.
-
-### References
-* [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+- The frontend requires `VITE_CLERK_PUBLISHABLE_KEY`.
+- `VITE_API_BASE_URL` should point to the backend from the browser's perspective.
+- The included compose file sets `VITE_API_BASE_URL` automatically.
