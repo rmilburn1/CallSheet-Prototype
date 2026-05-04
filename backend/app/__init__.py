@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from config import Config
+from config import get_database_url
 from fastapi.middleware.cors import CORSMiddleware
 
 # Initialize FastAPI app
@@ -39,7 +39,7 @@ logger.addHandler(file_handler)
 logger.info('Cast and Crew Search startup')
 
 # Database setup
-DATABASE_URL = Config.SQLALCHEMY_DATABASE_URI
+DATABASE_URL = get_database_url()
 if DATABASE_URL.startswith('sqlite'):
     # For sqlite, use check_same_thread=False
     engine = create_engine(
