@@ -31,7 +31,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import Login from "./pages/login";
 import Film from "./pages/film";
 import Results from "./pages/results";
-import Profile from "./pages/profile.tsx";
+import Profile from "./pages/profile";
 
 import './App.css'
 

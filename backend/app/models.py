@@ -20,6 +20,8 @@ class User(Base):
     minor = Column(String(64), index=True)
     grad_year = Column(Integer(), index=True)
     password_hash = Column(String(128))
+    bio = Column(String())
+    social_links = Column(String())
 
     def __repr__(self):
         return f'<User {self.first_name}>'
@@ -89,4 +91,15 @@ class UserToProjectToRole(Base):
 
     def __repr__(self):
         return f'<User ID: {self.user_id}, Project ID: {self.project_id} and Role ID: {self.role_id}>'
+
+
+class UserInterestedRole(Base):
+    __tablename__ = "user_interested_role"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    role_id = Column(Integer, ForeignKey('role.id'))
+
+    def __repr__(self):
+        return f'<User ID: {self.user_id} Interested Role ID: {self.role_id}>'
 

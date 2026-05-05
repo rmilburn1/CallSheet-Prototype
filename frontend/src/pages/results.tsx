@@ -60,6 +60,22 @@ export default function Results() {
               <span>{profile.USERNAME}</span>
               {profile.EMAIL && <span>{profile.EMAIL}</span>}
             </div>
+
+            <h3>About</h3>
+            <p>{profile.BIO ?? 'No bio provided.'}</p>
+
+            <h3>Interested Roles</h3>
+            <div className='roles-list'>
+              {profile.INTERESTED_ROLES && profile.INTERESTED_ROLES.length ? (
+                profile.INTERESTED_ROLES.map((role) => (
+                  <span key={role.ID} className='role-pill'>
+                    {role.TITLE}
+                  </span>
+                ))
+              ) : (
+                <p>No roles selected.</p>
+              )}
+            </div>
           </section>
 
           <section className='profile-projects'>

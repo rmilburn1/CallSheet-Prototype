@@ -6,7 +6,7 @@ from sqlalchemy import String, cast, func, or_
 from pydantic import BaseModel, Field
 
 from app import app
-from app.models import User, Project, Role, Skill, UserToSkill, UserToProjectToRole
+from app.models import User, Project, Role, Skill, UserToSkill, UserToProjectToRole, UserInterestedRole
 from app.dependencies import get_current_user, get_db, get_optional_user
 from flask_mail import Message
 
@@ -37,12 +37,21 @@ def serialize_user(user: User | None) -> dict[str, str]:
         }
 
     full_name = " ".join(part for part in [user.first_name, user.last_name] if part).strip()
+    social_links = {}
+    try:
+        if user.social_links:
+            social_links = json.loads(user.social_links)
+    except Exception:
+        social_links = {}
+
     return {
         "USERNAME": user.username or "",
         "FIRST_NAME": user.first_name or "",
         "LAST_NAME": user.last_name or "",
         "FULL_NAME": full_name,
         "EMAIL": user.email or "",
+        "BIO": user.bio or "",
+        "SOCIAL_LINKS": social_links,
     }
 
 
@@ -151,6 +160,64 @@ class ProfileResponse(BaseModel):
     FULL_NAME: str
     EMAIL: str
     PROJECTS: list[dict[str, str | list[str]]]
+
+
+class UpdateProfileRequest(BaseModel):
+    BIO: str | None = None
+    SOCIAL_LINKS: dict | None = None
+    INTERESTED_ROLE_IDS: list[int] = Field(default_factory=list)
+
+
+@app.put("/api/profile/{username}", response_class=JSONResponse)
+async def api_update_profile(
+    username: str,
+    payload: UpdateProfileRequest,
+    owner_username: str | None = Header(None, alias='X-Owner-Username'),
+    owner_email: str | None = Header(None, alias='X-Owner-Email'),
+    current_user: User | None = Depends(get_optional_user),
+    db: Session = Depends(get_db)
+):
+    # allow update if the caller is the authenticated user OR provides the matching owner username/email header
+    normalized_target = normalize_identifier(username)
+    authorized = False
+
+    if current_user is not None and normalize_identifier(current_user.username) == normalized_target:
+        authorized = True
+
+    if not authorized and owner_username:
+        if normalize_identifier(owner_username) == normalized_target:
+            authorized = True
+
+    if not authorized and owner_email:
+        if normalize_identifier(owner_email) == normalized_target or normalize_identifier(owner_email).split('@')[0] == normalized_target:
+            authorized = True
+
+    if not authorized:
+        raise HTTPException(status_code=403, detail="Can only update your own profile")
+
+    # find the user record by username
+    user = db.query(User).filter(func.lower(User.username) == normalized_target).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if payload.BIO is not None:
+        user.bio = (payload.BIO or "").strip()
+
+    if payload.SOCIAL_LINKS is not None:
+        try:
+            user.social_links = json.dumps(payload.SOCIAL_LINKS)
+        except Exception:
+            user.social_links = ""
+
+    db.commit()
+
+    # update interested roles mapping
+    db.query(UserInterestedRole).filter(UserInterestedRole.user_id == user.id).delete(synchronize_session=False)
+    for role_id in payload.INTERESTED_ROLE_IDS:
+        db.add(UserInterestedRole(user_id=user.id, role_id=role_id))
+    db.commit()
+
+    return JSONResponse({"profile": serialize_user(user)})
 
 
 def split_full_name(full_name: str | None) -> tuple[str | None, str | None]:
@@ -591,8 +658,17 @@ async def api_profile(
         func.lower(cast(Project.user_id, String)) == normalize_identifier(user.username)
     ).order_by(Project.id.asc()).all()
 
+    # include interested roles for this user
+    interested_rows = db.query(Role.id, Role.title).join(
+        UserInterestedRole, Role.id == UserInterestedRole.role_id
+    ).filter(UserInterestedRole.user_id == user.id).order_by(Role.title.asc()).all()
+    interested = [{"ID": str(rid), "TITLE": title} for (rid, title) in interested_rows]
+
+    profile_data = serialize_user(user)
+    profile_data["INTERESTED_ROLES"] = interested
+
     return JSONResponse({
-        "profile": serialize_user(user),
+        "profile": profile_data,
         "projects": [serialize_project(project, db) for project in projects],
     })
 
