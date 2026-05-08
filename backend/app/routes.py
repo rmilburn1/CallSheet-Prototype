@@ -1,14 +1,13 @@
 from fastapi import Depends, Form, Request, status, HTTPException, Header, Query
 from fastapi.responses import JSONResponse, RedirectResponse
-from flask import jsonify
 from sqlalchemy.orm import Session
 from sqlalchemy import String, cast, func, or_
 from pydantic import BaseModel, Field
+import json
 
 from app import app
 from app.models import User, Project, Role, Skill, UserToSkill, UserToProjectToRole, UserInterestedRole
 from app.dependencies import get_current_user, get_db, get_optional_user
-from flask_mail import Message
 
 
 def normalize_identifier(value: str | int | None) -> str:
@@ -582,38 +581,6 @@ async def user_profile(
         "user": user,
         "user_name": user_name,
         "project_list": projects
-    })
-
-
-@app.post("/user/{username}/contact", response_class=JSONResponse)
-async def send_contact_message(
-    username: str,
-    request: Request,
-    name: str = Form(...),
-    email: str = Form(...),
-    message: str = Form(...),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    user = db.query(User).filter(func.lower(User.username) == normalize_identifier(username)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    msg = Message(
-        subject=f'You got a message from {email}',
-        sender='cs205testingfall23@gmail.com',
-        cc=[email],
-        recipients=[user.email]
-    )
-    msg.body = message
-    mail.send(msg)
-    
-    return ({
-        "title": f"{user.first_name} {user.last_name}",
-        "user": user,
-        "user_name": f"{user.first_name} {user.last_name}",
-        "project_list": db.query(Project).filter(Project.user_id == user.id).all(),
-        "success": "Message was sent!"
     })
 
 
